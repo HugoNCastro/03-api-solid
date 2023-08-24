@@ -19,8 +19,8 @@ describe("Check-in Use Case", () => {
       title: 'JS Gym',
       description: '',
       phone: '61982121299',
-      latitude: new Decimal(0),
-      longitude: new Decimal(0)
+      latitude: new Decimal(-15.8425925),
+      longitude: new Decimal(-48.0990316)
     })
 
     vi.useFakeTimers()
@@ -34,8 +34,8 @@ describe("Check-in Use Case", () => {
     const { checkIn } = await sut.execute({
       gymId: 'gym-01',
       userId: 'user-01',
-      userLatitude: 0,
-      userLongitude: 0,
+      userLatitude: -15.8425925,
+      userLongitude: -48.0990316,
     });
 
     expect(checkIn.id).toEqual(expect.any(String))
@@ -47,15 +47,15 @@ describe("Check-in Use Case", () => {
     await sut.execute({
       gymId: 'gym-01',
       userId: 'user-01',
-      userLatitude: 0,
-      userLongitude: 0,
+      userLatitude: -15.8425925,
+      userLongitude: -48.0990316,
     });
 
     await expect(() => sut.execute({
       gymId: 'gym-01',
       userId: 'user-01',
-      userLatitude: 0,
-      userLongitude: 0,
+      userLatitude: -15.8425925,
+      userLongitude: -48.0990316,
     }))
       .rejects.toBeInstanceOf(Error)
   });
@@ -66,8 +66,8 @@ describe("Check-in Use Case", () => {
     await sut.execute({
       gymId: 'gym-01',
       userId: 'user-01',
-      userLatitude: 0,
-      userLongitude: 0,
+      userLatitude: -15.8425925,
+      userLongitude: -48.0990316,
     });
 
     vi.setSystemTime(new Date(2022, 0, 21, 8, 0, 0))
@@ -75,10 +75,33 @@ describe("Check-in Use Case", () => {
     const { checkIn } = await sut.execute({
       gymId: 'gym-01',
       userId: 'user-01',
-      userLatitude: 0,
-      userLongitude: 0,
+      userLatitude: -15.8425925,
+      userLongitude: -48.0990316,
     })
 
     expect(checkIn.id).toEqual(expect.any(String))
+  });
+
+  it("should not be able to check in on distant gym", async () => {
+    gymsRepository.items.push({
+      id: 'gym-02',
+      title: 'CMX Gym',
+      description: '',
+      phone: '61982121299',
+      latitude: new Decimal(-15.8297262),
+      longitude: new Decimal(-48.0612646)
+    })
+
+    // -15.8761137,-48.090551 --- 100m da localizaçao do usuário
+    // -15.8297262,-48.0612646 --- Mais de cem metros da localizaçao do usuário  
+
+    await expect(() =>
+      sut.execute({
+        gymId: 'gym-02',
+        userId: 'user-01',
+        userLatitude: -15.8761137,
+        userLongitude: -48.090551,
+      })
+    ).rejects.toBeInstanceOf(Error)
   });
 })
