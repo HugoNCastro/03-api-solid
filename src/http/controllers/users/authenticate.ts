@@ -19,30 +19,38 @@ export async function authenticate(request: FastifyRequest, reply: FastifyReply)
       email, password
     })
 
-    const token = await reply.jwtSign({}, {
-      sign: {
-        sub: user.id
-      }
-    })
+    const token = await reply.jwtSign(
+      {
+        role: user.role
+      },
+      {
+        sign: {
+          sub: user.id
+        }
+      })
 
-    const refreshToken = await reply.jwtSign({}, {
-      sign: {
-        sub: user.id,
-        expiresIn: '7d'
-      }
-    })
+    const refreshToken = await reply.jwtSign(
+      {
+        role: user.role
+      },
+      {
+        sign: {
+          sub: user.id,
+          expiresIn: '7d'
+        }
+      })
 
     return reply
       .setCookie('refreshToken', refreshToken, {
         path: '/',
-        secure: true, 
-        sameSite: true, 
-        httpOnly: true 
+        secure: true,
+        sameSite: true,
+        httpOnly: true
       })
       .status(200)
       .send({
-      token,
-    })
+        token,
+      })
   } catch (err) {
     if (err instanceof UserAlreadyExistsError) {
       return reply.status(400).send({ message: err.message })
