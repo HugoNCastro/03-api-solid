@@ -8,7 +8,7 @@ import { history } from './history'
 import { metrics } from './metrics'
 
 
-export async function gymsRoutes(app: FastifyInstance) {
+export async function checkInsRoutes(app: FastifyInstance) {
   app.addHook('onRequest', verifyJwt)
   
   app.get('/check-ins/history', history)
